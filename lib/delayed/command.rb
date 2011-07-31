@@ -26,6 +26,9 @@ module Delayed
         opts.on('-e', '--environment=NAME', 'Specifies the environment to run this delayed jobs under (test/development/production).') do |e|
           STDERR.puts "The -e/--environment option has been deprecated and has no effect. Use RAILS_ENV and see http://github.com/collectiveidea/delayed_job/issues/#issue/7"
         end
+        opts.on('-j', '--job-group NAME', "Worker's job group name.") do |name|
+          @options[:job_group] = name
+        end
         opts.on('--min-priority N', 'Minimum priority of jobs to run.') do |n|
           @options[:min_priority] = n
         end
@@ -64,14 +67,15 @@ module Delayed
       dir = @options[:pid_dir]
       Dir.mkdir(dir) unless File.exists?(dir)
       
+      name = "delayed_job#{'.' + @options[:job_group] if @options[:job_group]}"
       if @worker_count > 1 && @options[:identifier]
         raise ArgumentError, 'Cannot specify both --number-of-workers and --identifier'
       elsif @worker_count == 1 && @options[:identifier]
-        process_name = "delayed_job.#{@options[:identifier]}"
+        process_name = "#{name}.#{@options[:identifier]}"
         run_process(process_name, dir)
       else
         worker_count.times do |worker_index|
-          process_name = worker_count == 1 ? "delayed_job" : "delayed_job.#{worker_index}"
+          process_name = worker_count == 1 ? name : "#{name}.#{worker_index}"
           run_process(process_name, dir)
         end
       end

@@ -6,6 +6,7 @@ ActiveRecord::Migration.verbose = false
 
 ActiveRecord::Schema.define do
   create_table :delayed_jobs, :force => true do |table|
+    table.string   :job_group,:default => "regular"
     table.integer  :priority, :default => 0
     table.integer  :attempts, :default => 0
     table.text     :handler

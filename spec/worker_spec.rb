@@ -72,6 +72,37 @@ describe Delayed::Worker do
         end
       end
 
+      context "worker on job group" do
+        before(:each) do
+          @worker = Delayed::Worker.new(:max_priority => 5, :min_priority => -5, :quiet => true, :job_group => "mail")
+        end
+
+        it "should no work_off jobs" do
+          SimpleJob.runs.should == 0
+
+          job_create(:job_group => "regular")
+          job_create(:job_group => "regular")
+          @worker.work_off
+
+          SimpleJob.runs.should == 0
+        end
+
+        it "should only work_off jobs that are mail" do
+          SimpleJob.runs.should == 0
+
+          job_create(:job_group => "regular")
+          job_create(:job_group => "regular")
+          job_create(:job_group => "mail")
+          @worker.work_off
+
+          SimpleJob.runs.should == 1
+        end
+
+        after(:each) do
+          @worker = Delayed::Worker.new(:job_group => "regular")
+        end
+      end
+
       context "while running with locked and expired jobs" do
         before(:each) do
           @worker.name = 'worker1'

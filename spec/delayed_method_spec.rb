@@ -31,11 +31,20 @@ describe Object do
       lambda { Object.delay.to_s }.should change { Delayed::Job.count }.by(1)
     end
     
-    it "should set job options" do
+    it "should set job options defalt" do
       run_at = 1.day.from_now
       job = Object.delay(:priority => 20, :run_at => run_at).to_s
       job.run_at.should == run_at
       job.priority.should == 20
+      job.job_group.should == "regular"
+    end
+    
+    it "should set job options" do
+      run_at = 1.day.from_now
+      job = Object.delay(:priority => 20, :run_at => run_at, :job_group => "mail").to_s
+      job.run_at.should == run_at
+      job.priority.should == 20
+      job.job_group.should == "mail"
     end
     
     it "should save args for original method" do
