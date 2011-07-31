@@ -64,7 +64,7 @@ module Delayed
         @files_to_reopen << file unless file.closed?
       end
       
-      dir = @options[:pid_dir]
+      dir = "#{@options[:pid_dir]}#{'/' + @options[:job_group] if @options[:job_group]}"
       Dir.mkdir(dir) unless File.exists?(dir)
       
       name = "delayed_job#{'.' + @options[:job_group] if @options[:job_group]}"
